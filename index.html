@@ -1,0 +1,626 @@
+
+index.html
+
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wheelie Party 4K Ultra Arcade</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0b16;
+            font-family: 'Segoe UI', system-ui, Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #gameWrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2vh 2vw;
+            box-sizing: border-box;
+        }
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .hud-card {
+            background: rgba(15, 15, 30, 0.75);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        #scoreCard { color: #00ffcc; border-color: rgba(0, 255, 204, 0.3); }
+        #coinCard { color: #ffd700; border-color: rgba(255, 215, 0, 0.3); }
+        #multCard {
+            position: absolute;
+            top: 9vh;
+            left: 2vw;
+            font-size: 1.1rem;
+            color: #ff5722;
+            border-color: rgba(255, 87, 34, 0.3);
+            transition: transform 0.1s ease;
+        }
+        .pop { transform: scale(1.2); }
+        
+        /* Unified Menu Panels */
+        .menu-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 6, 14, 0.9);
+            backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0,255,204,0.6);
+            text-align: center;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #8a8ab0;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .tab-btn {
+            padding: 10px 25px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            color: #aaa;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #00ffcc;
+            color: #000;
+            border-color: #00ffcc;
+            box-shadow: 0 0 15px rgba(0,255,204,0.4);
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 35px;
+        }
+        .shop-card {
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .shop-card.selected {
+            border-color: #00ffcc;
+            background: rgba(0, 255, 204, 0.05);
+        }
+        .shop-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+        .shop-card p {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 15px;
+            height: 40px;
+        }
+        .stats-box {
+            width: 100%;
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .stat-bar {
+            height: 6px;
+            background: #222;
+            border-radius: 3px;
+            margin-top: 3px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .stat-fill {
+            height: 100%;
+            background: #ff5722;
+        }
+        .action-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-buy { background: #ffd700; color: #000; }
+        .btn-select { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-selected { background: #00ffcc; color: #000; pointer-events: none; }
+        
+        .main-start-btn {
+            padding: 15px 50px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #000;
+            background: #00ffcc;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(0,255,204,0.3);
+            transition: transform 0.1s, background 0.2s;
+        }
+        .main-start-btn:active { transform: scale(0.95); }
+        
+        #instructionsHint {
+            bottom: 2vh;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gameWrapper">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Core Gameplay HUD Interface -->
+        <div class="hud-overlay">
+            <div class="hud-top">
+                <div id="scoreCard" class="hud-card">Dist: <span id="scoreVal">0</span>m</div>
+                <div id="coinCard" class="hud-card">🪙 <span id="coinVal">0</span></div>
+            </div>
+            <div id="multCard" class="hud-card">Mult: X<span id="multVal">1.0</span></div>
+            <div id="instructionsHint" style="position: absolute;">HOLD SPACE / TOUCH TO POPS WHEELIE</div>
+        </div>
+
+        <!-- Master Menu Container (Shop, Maps, High Scores) -->
+        <div id="menuPanel" class="menu-panel">
+            <h1 id="menuTitle">Wheelie Party 4K</h1>
+            <p id="menuSubtitle" class="subtitle">Select your ride and map, buy upgrades, and ride out.</p>
+            
+            <div class="tabs">
+                <button id="tabBikes" class="tab-btn active">Bikes</button>
+                <button id="tabMaps" class="tab-btn">Maps</button>
+            </div>
+
+            <!-- Content Windows Grid Layouts -->
+            <div id="shopGrid" class="grid-container"></div>
+
+            <button id="masterStartBtn" class="main-start-btn">Start Session</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const menuPanel = document.getElementById('menuPanel');
+        const shopGrid = document.getElementById('shopGrid');
+        const masterStartBtn = document.getElementById('masterStartBtn');
+        const menuTitle = document.getElementById('menuTitle');
+        const menuSubtitle = document.getElementById('menuSubtitle');
+
+        // Dynamic Native 4K Native Support Matrix Configuration
+        const V_WIDTH = 3840;  // Native 4K Internal Coordinate Map Width 
+        const V_HEIGHT = 2160; // Native 4K Internal Coordinate Map Height
+        canvas.width = V_WIDTH;
+        canvas.height = V_HEIGHT;
+
+        // Persistent Save Management Profile Layer 
+        let saveProfile = {
+            totalCoins: 0,
+            unlockedBikes: ['scooter'],
+            unlockedMaps: ['city'],
+            currentBike: 'scooter',
+            currentMap: 'city'
+        };
+
+        // Load Persistent Store Matrix
+        if(localStorage.getItem('WPA_4K_SAVE')) {
+            try { saveProfile = JSON.parse(localStorage.getItem('WPA_4K_SAVE')); } catch(e){}
+        }
+
+        function saveGame() {
+            localStorage.setItem('WPA_4K_SAVE', JSON.stringify(saveProfile));
+        }
+
+        // Configuration Schemas
+        const BIKES_DATABASE = {
+            scooter: { name: "City Moped", desc: "Lightweight, low torque, easy to handle baseline.", cost: 0, weight: 0.4, power: 0.35, wheel: 60, frameColor: '#3498db' },
+            chopper: { name: "Cruiser Chopper", desc: "Heavy backend chassis. Slow lift but rock solid.", cost: 15, weight: 0.7, power: 0.55, wheel: 85, frameColor: '#e67e22' },
+Use code with caution.
+superbike: { name: "Hyper Sport 1000cc", desc: "Massive engine torque. Fast twitch response profiles.", cost: 45, weight: 0.5, power: 0.85, wheel: 70, frameColor: '#e74c3c' }
+};
+const MAPS_DATABASE = {
+city: { name: "Metropolitan Boulevard", desc: "Standard flat asphalt, smooth runs.", cost: 0, sky: ['#0f172a', '#1e293b'], floor: '#475569', line: '#f1f5f9' },
+cyber: { name: "Neo-Neon Tokyo Grid", desc: "High contrast synthwave digital highways.", cost: 20, sky: ['#03001e', '#7303c0'], floor: '#111', line: '#00ffcc' },
+desert: { name: "Sahara Dunes Ridge", desc: "Bumpy cross country rally trail terrain blocks.", cost: 40, sky: ['#ff7e5f', '#feb47b'], floor: '#d2b48c', line: '#a0522d' }
+};
+// Execution Loop Lifecycle Context Structures
+let gameState = 'MENU';
+let score = 0;
+let sessionCoins = 0;
+let distanceMultiplier = 1.0;
+let isPressing = false;
+let currentTab = 'bikes';
+// Dynamic Physics Properties Matrix Context
+let gameSpeed = 15;
+let groundY = V_HEIGHT - 450;
+let roadOffset = 0;
+let collectibles = [];
+let gates = [];
+let bikeState = {
+x: 800,
+y: groundY,
+angle: 0,
+angularVelocity: 0,
+length: 220,
+maxAngle: Math.PI / 2.15
+};
+// Unified Component Grid Menu Rendering System Logic
+function renderMenuGrids() {
+shopGrid.innerHTML = '';
+if (currentTab === 'bikes') {
+Object.keys(BIKES_DATABASE).forEach(key => {
+const b = BIKES_DATABASE[key];
+const isUnlocked = saveProfile.unlockedBikes.includes(key);
+const isSelected = saveProfile.currentBike === key;
+const card = document.createElement('div');
+card.className = shop-card ${isSelected ? 'selected' : ''};
+card.innerHTML = <h3>${b.name}</h3> <p>${b.desc}</p> <div class="stats-box"> Weight: <div class="stat-bar"><div class="stat-fill" style="width:${b.weight*100}%; background:#3498db"></div></div> Torque Power: <div class="stat-bar"><div class="stat-fill" style="width:${b.power*100}%; background:#e74c3c"></div></div> </div> <button class="action-btn ${isSelected ? 'btn-selected' : (isUnlocked ? 'btn-select' : 'btn-buy')}" data-key="${key}"> ${isSelected ? 'Selected' : (isUnlocked ? 'Equip' :🪙 ${b.cost} Coins)} </button> ;
+shopGrid.appendChild(card);
+});
+} else {
+Object.keys(MAPS_DATABASE).forEach(key => {
+const m = MAPS_DATABASE[key];
+const isUnlocked = saveProfile.unlockedMaps.includes(key);
+const isSelected = saveProfile.currentMap === key;
+const card = document.createElement('div');
+card.className = shop-card ${isSelected ? 'selected' : ''};
+card.innerHTML = <h3>${m.name}</h3> <p>${m.desc}</p> <div style="width:100%; height:30px; background:linear-gradient(90deg, ${m.sky[0]}, ${m.sky[1]}); margin-bottom:15px; border-radius:4px;"></div> <button class="action-btn ${isSelected ? 'btn-selected' : (isUnlocked ? 'btn-select' : 'btn-buy')}" data-key="${key}"> ${isSelected ? 'Selected' : (isUnlocked ? 'Travel' :🪙 ${m.cost} Coins)} </button> ;
+shopGrid.appendChild(card);
+});
+}
+updateHUDText();
+}
+// Grid Click Interaction Pipelines Engine
+shopGrid.addEventListener('click', (e) => {
+if (!e.target.classList.contains('action-btn')) return;
+const key = e.target.getAttribute('data-key');
+if (currentTab === 'bikes') {
+if (saveProfile.unlockedBikes.includes(key)) {
+saveProfile.currentBike = key;
+} else {
+const cost = BIKES_DATABASE[key].cost;
+if (saveProfile.totalCoins >= cost) {
+saveProfile.totalCoins -= cost;
+saveProfile.unlockedBikes.push(key);
+saveProfile.currentBike = key;
+} else { alert("Not enough coins collected!"); return; }
+}
+} else {
+if (saveProfile.unlockedMaps.includes(key)) {
+saveProfile.currentMap = key;
+} else {
+const cost = MAPS_DATABASE[key].cost;
+if (saveProfile.totalCoins >= cost) {
+saveProfile.totalCoins -= cost;
+saveProfile.unlockedMaps.push(key);
+saveProfile.currentMap = key;
+} else { alert("Not enough coins collected!"); return; }
+}
+}
+saveGame();
+renderMenuGrids();
+});
+// Tab Switching Controls Logic UI Layout Layer
+document.getElementById('tabBikes').addEventListener('click', () => {
+currentTab = 'bikes';
+document.getElementById('tabBikes').classList.add('active');
+document.getElementById('tabMaps').classList.remove('active');
+renderMenuGrids();
+});
+document.getElementById('tabMaps').addEventListener('click', () => {
+currentTab = 'maps';
+document.getElementById('tabMaps').classList.add('active');
+document.getElementById('tabBikes').classList.remove('active');
+renderMenuGrids();
+});
+// Master Application Event Routing Layer Engine
+function setPressState(active) {
+if (gameState === 'PLAYING') {
+isPressing = active;
+} else if (gameState === 'GAMEOVER') {
+initiateGameLaunch();
+}
+}
+window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); setPressState(true); } });
+window.addEventListener('keyup', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') setPressState(false); });
+canvas.addEventListener('mousedown', (e) => { e.preventDefault(); setPressState(true); });
+canvas.addEventListener('mouseup', () => setPressState(false));
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); setPressState(true); });
+canvas.addEventListener('touchend', () => setPressState(false));
+masterStartBtn.addEventListener('click', initiateGameLaunch);
+function updateHUDText() {
+document.getElementById('scoreVal').textContent = Math.floor(score);
+document.getElementById('coinVal').textContent = saveProfile.totalCoins + sessionCoins;
+document.getElementById('multVal').textContent = distanceMultiplier.toFixed(1);
+}
+function initiateGameLaunch() {
+score = 0;
+sessionCoins = 0;
+distanceMultiplier = 1.0;
+gameSpeed = 16;
+bikeState.angle = 0;
+bikeState.angularVelocity = 0;
+collectibles = [];
+gates = [];
+isPressing = false;
+gameState = 'PLAYING';
+menuPanel.style.display = 'none';
+updateHUDText();
+}
+function triggerCrashSequence(reason) {
+gameState = 'GAMEOVER';
+saveProfile.totalCoins += sessionCoins;
+saveGame();
+menuTitle.textContent = "Crash Detected!";
+menuSubtitle.innerHTML = ${reason}<br><br>Distance Traveled: <b>${Math.floor(score)}m</b><br>Session Profit: 🪙 <b>${sessionCoins}</b>;
+masterStartBtn.textContent = "Re-Ride Circuit";
+menuPanel.style.display = 'flex';
+renderMenuGrids();
+}
+function processSimulationPhysics() {
+const activeBike = BIKES_DATABASE[saveProfile.currentBike];
+// Dynamic Physics Scaling Constants Layout
+const massFactor = activeBike.weight * 0.22;
+const engineTorque = activeBike.power * 0.32;
+gameSpeed = 16 + (score / 120);
+if (isPressing) {
+bikeState.angularVelocity += engineTorque * 0.15;
+} else {
+bikeState.angularVelocity -= massFactor * 0.18;
+}
+bikeState.angularVelocity *= 0.95; // Mechanical dampening coefficient matrix block
+bikeState.angle += bikeState.angularVelocity;
+// Chassis ground level check boundary
+if (bikeState.angle <= 0) {
+bikeState.angle = 0;
+bikeState.angularVelocity = 0;
+if(distanceMultiplier > 1.0) {
+distanceMultiplier = 1.0;
+updateHUDText();
+}
+}
+// Fatal back-flip check bounds
+if (bikeState.angle > bikeState.maxAngle) {
+triggerCrashSequence("Flipped Chassis Backward!");
+return;
+}
+// Dynamic Score Accumulation Index Logic Rules
+if (bikeState.angle > 0.04) {
+score += (gameSpeed * 0.01) * distanceMultiplier;
+updateHUDText();
+}
+// Background entity scroll layout
+roadOffset = (roadOffset - gameSpeed) % 160;
+// Generate Map Elements
+if (Math.random() < 0.02 && collectibles.length < 8) {
+collectibles.push({
+x: V_WIDTH + 100,
+y: Math.random() > 0.4 ? groundY - Math.sin(0.4) * bikeState.length - 80 : groundY - 100,
+radius: 35
+});
+}
+if (Math.random() < 0.004 && gates.length === 0) {
+gates.push({
+x: V_WIDTH + 200,
+targetAngle: 0.25 + Math.random() * 0.45,
+width: 200,
+passed: false
+});
+}
+// Matrix entities lifecycle collision resolution calculations
+const rearWheelX = bikeState.x;
+const rearWheelY = groundY - activeBike.wheel;
+const frontWheelX = rearWheelX + Math.cos(bikeState.angle) * bikeState.length;
+const frontWheelY = rearWheelY - Math.sin(bikeState.angle) * bikeState.length;
+collectibles.forEach(coin => {
+coin.x -= gameSpeed;
+const dRear = Math.hypot(coin.x - rearWheelX, coin.y - rearWheelY);
+const dFront = Math.hypot(coin.x - frontWheelX, coin.y - frontWheelY);
+if ((dRear < coin.radius + activeBike.wheel * 1.5) || (dFront < coin.radius + activeBike.wheel * 1.2)) {
+sessionCoins++;
+coin.x = -9999; // Flush entity instance context bounds
+updateHUDText();
+}
+});
+gates.forEach(gate => {
+gate.x -= gameSpeed;
+if (!gate.passed && gate.x < bikeState.x + 100 && gate.x > bikeState.x - 100) {
+if (Math.abs(bikeState.angle - gate.targetAngle) < 0.18) {
+gate.passed = true;
+distanceMultiplier += 0.5;
+document.getElementById('multCard').classList.add('pop');
+setTimeout(() => document.getElementById('multCard').classList.remove('pop'), 150);
+updateHUDText();
+}
+}
+});
+collectibles = collectibles.filter(c => c.x > -100);
+gates = gates.filter(g => g.x > -200);
+}
+// High Fidelity 4K Graphic Pipeline Implementation Core
+function renderGraphicsSlate() {
+const m = MAPS_DATABASE[saveProfile.currentMap];
+const b = BIKES_DATABASE[saveProfile.currentBike];
+// Render Skyline Background Matrix Gradient
+let skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+skyGrad.addColorStop(0, m.sky[0]);
+skyGrad.addColorStop(1, m.sky[1]);
+ctx.fillStyle = skyGrad;
+ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+// Ambient background visual anchors depending on chosen terrain index
+ctx.fillStyle = 'rgba(255,255,255,0.03)';
+if(saveProfile.currentMap === 'desert') {
+// Dune Hills Vectors
+ctx.fillStyle = 'rgba(210,180,140,0.15)';
+ctx.beginPath(); ctx.moveTo(0, groundY); ctx.quadraticCurveTo(V_WIDTH0.3, groundY-400, V_WIDTH0.6, groundY); ctx.moveTo(V_WIDTH0.4, groundY); ctx.quadraticCurveTo(V_WIDTH0.8, groundY-500, V_WIDTH, groundY); ctx.fill();
+} else if (saveProfile.currentMap === 'cyber') {
+// Digital Grid Sky Pillars Lines
+ctx.strokeStyle = 'rgba(0, 255, 204, 0.05)'; ctx.lineWidth = 4;
+for(let i=0; i<V_WIDTH; i+=400) { ctx.strokeRect(i + (roadOffset0.2), 200, 150, groundY-200); }
+} else {
+// Skyline structural cityscape geometry
+ctx.fillStyle = 'rgba(255,255,255,0.02)';
+for(let i=0; i<V_WIDTH; i+=300) { ctx.fillRect(i + (roadOffset0.1), 400 + (i%3)*100, 200, groundY); }
+}
+// Render Road Deck Asphalt Layer
+ctx.fillStyle = m.floor;
+ctx.fillRect(0, groundY, V_WIDTH, V_HEIGHT - groundY);
+ctx.fillStyle = 'rgba(0,0,0,0.2)';
+ctx.fillRect(0, groundY, V_WIDTH, 25); // Edge shadow accent
+// Procedural Dash Line Track Engine Loop Matrix Array Build
+ctx.fillStyle = m.line;
+for (let i = roadOffset; i < V_WIDTH + 320; i += 320) {
+ctx.fillRect(i, groundY + 120, 140, 15);
+}
+// Render Active Level Interface Entities Array
+collectibles.forEach(coin => {
+ctx.fillStyle = '#ffd700'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 6;
+ctx.beginPath(); ctx.arc(coin.x, coin.y, coin.radius, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+ctx.fillStyle = '#b8860b'; ctx.font = '900 40px sans-serif'; ctx.fillText("$", coin.x - 12, coin.y + 14);
+});
+gates.forEach(gate => {
+ctx.save();
+ctx.translate(gate.x, groundY - b.wheel);
+ctx.rotate(-gate.targetAngle);
+ctx.strokeStyle = gate.passed ? '#00ffcc' : '#ff0055';
+ctx.lineWidth = 12;
+ctx.strokeRect(-20, -b.wheel*2, gate.width + 40, b.wheel * 4);
+ctx.restore();
+ctx.fillStyle = gate.passed ? '#00ffcc' : '#ff0055';
+ctx.font = 'bold 36px sans-serif';
+ctx.fillText(gate.passed ? "COMBO MATCHED!" : "ALIGN BIKE HERE", gate.x - 120, groundY - 350);
+});
+// Master Art Pipeline Vector Chassis System For Bikes Model Array Structure
+ctx.save();
+const rWheelX = bikeState.x;
+const rWheelY = groundY - b.wheel;
+ctx.translate(rWheelX, rWheelY);
+ctx.rotate(-bikeState.angle);
+// Structure Geometry: Frame Pipes
+ctx.strokeStyle = b.frameColor;
+ctx.lineWidth = 16;
+ctx.beginPath();
+ctx.moveTo(0, 0);
+ctx.lineTo(b.length * 0.4, -b.wheel * 1.2);
+ctx.lineTo(b.length * 0.8, -b.wheel * 1.3);
+ctx.lineTo(b.length * 0.3, 0);
+ctx.closePath();
+ctx.stroke();
+// Structural Element Components: Front Fork Columns
+ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 10;
+ctx.beginPath(); ctx.moveTo(b.length * 0.8, -b.wheel * 1.3); ctx.lineTo(b.length, 0); ctx.stroke();
+// Structural Element Components: Wheels Construction Rims Assembly
+ctx.fillStyle = '#111111'; ctx.strokeStyle = '#eeeeee'; ctx.lineWidth = 12;
+ctx.beginPath(); ctx.arc(0, 0, b.wheel, 0, Math.PI2); ctx.fill(); ctx.stroke();
+ctx.beginPath(); ctx.arc(b.length, 0, b.wheel, 0, Math.PI2); ctx.fill(); ctx.stroke();
+// Inner Core Spokes Mechanical Art Details
+ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 4;
+ctx.beginPath(); ctx.moveTo(-b.wheel,0); ctx.lineTo(b.wheel,0); ctx.moveTo(0,-b.wheel); ctx.lineTo(0,b.wheel); ctx.stroke();
+ctx.save(); ctx.translate(b.length, 0); ctx.rotate(roadOffset * 0.05); ctx.beginPath(); ctx.moveTo(-b.wheel,0); ctx.lineTo(b.wheel,0); ctx.moveTo(0,-b.wheel); ctx.lineTo(0,b.wheel); ctx.stroke(); ctx.restore();
+// Hub core pins center axes
+ctx.fillStyle = '#666'; ctx.beginPath(); ctx.arc(0,0,14,0,Math.PI2); ctx.arc(b.length,0,14,0,Math.PI2); ctx.fill();
+// Upper cockpit block components elements (Engine, Tank block, Saddle pad)
+ctx.fillStyle = '#222222'; ctx.fillRect(b.length0.2, -b.wheel * 1.05, b.length * 0.3, b.wheel * 0.5); // Engine block
+ctx.fillStyle = '#111'; ctx.fillRect(b.length0.1, -b.wheel * 1.35, b.length*0.25, 20); // Saddle Seat
+ctx.restore();
+}
+// Global Loop Master Orchestration Block Frame Loop
+function executableMasterFrameLoop() {
+if (gameState === 'PLAYING') {
+processSimulationPhysics();
+}
+renderGraphicsSlate();
+requestAnimationFrame(executableMasterFrameLoop);
+}
+// Initialization Run Command Sequence Kickoff
+renderMenuGrids();
+executableMasterFrameLoop();
