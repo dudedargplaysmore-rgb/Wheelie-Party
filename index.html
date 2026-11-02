@@ -1,7 +1,3 @@
-
-index.html
-
-html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,7 +83,6 @@ html
         }
         .pop { transform: scale(1.2); }
         
-        /* Unified Menu Panels */
         .menu-panel {
             position: absolute;
             top: 0;
@@ -240,17 +235,15 @@ html
     <div id="gameWrapper">
         <canvas id="gameCanvas"></canvas>
         
-        <!-- Core Gameplay HUD Interface -->
         <div class="hud-overlay">
             <div class="hud-top">
                 <div id="scoreCard" class="hud-card">Dist: <span id="scoreVal">0</span>m</div>
                 <div id="coinCard" class="hud-card">🪙 <span id="coinVal">0</span></div>
             </div>
             <div id="multCard" class="hud-card">Mult: X<span id="multVal">1.0</span></div>
-            <div id="instructionsHint" style="position: absolute;">HOLD SPACE / TOUCH TO POPS WHEELIE</div>
+            <div id="instructionsHint">HOLD SPACE / TOUCH TO POP A WHEELIE</div>
         </div>
 
-        <!-- Master Menu Container (Shop, Maps, High Scores) -->
         <div id="menuPanel" class="menu-panel">
             <h1 id="menuTitle">Wheelie Party 4K</h1>
             <p id="menuSubtitle" class="subtitle">Select your ride and map, buy upgrades, and ride out.</p>
@@ -260,7 +253,6 @@ html
                 <button id="tabMaps" class="tab-btn">Maps</button>
             </div>
 
-            <!-- Content Windows Grid Layouts -->
             <div id="shopGrid" class="grid-container"></div>
 
             <button id="masterStartBtn" class="main-start-btn">Start Session</button>
@@ -276,13 +268,12 @@ html
         const menuTitle = document.getElementById('menuTitle');
         const menuSubtitle = document.getElementById('menuSubtitle');
 
-        // Dynamic Native 4K Native Support Matrix Configuration
-        const V_WIDTH = 3840;  // Native 4K Internal Coordinate Map Width 
-        const V_HEIGHT = 2160; // Native 4K Internal Coordinate Map Height
+        const V_WIDTH = 3840;  
+        const V_HEIGHT = 2160; 
         canvas.width = V_WIDTH;
         canvas.height = V_HEIGHT;
 
-        // Persistent Save Management Profile Layer 
+        // Default layout parameters
         let saveProfile = {
             totalCoins: 0,
             unlockedBikes: ['scooter'],
@@ -291,20 +282,29 @@ html
             currentMap: 'city'
         };
 
-        // Load Persistent Store Matrix
+        // Resilient data-merging fix to clean broken browser memory arrays
         if(localStorage.getItem('WPA_4K_SAVE')) {
-            try { saveProfile = JSON.parse(localStorage.getItem('WPA_4K_SAVE')); } catch(e){}
+            try { 
+                const loaded = JSON.parse(localStorage.getItem('WPA_4K_SAVE')); 
+                if (loaded && typeof loaded === 'object') {
+                    // Safe structural merge properties baseline validation
+                    saveProfile = Object.assign({}, saveProfile, loaded);
+                    if (!Array.isArray(saveProfile.unlockedBikes)) saveProfile.unlockedBikes = ['scooter'];
+                    if (!Array.isArray(saveProfile.unlockedMaps)) saveProfile.unlockedMaps = ['city'];
+                }
+            } catch(e){
+                console.error("Save state repaired reset initialization.");
+            }
         }
 
         function saveGame() {
             localStorage.setItem('WPA_4K_SAVE', JSON.stringify(saveProfile));
         }
 
-        // Configuration Schemas
         const BIKES_DATABASE = {
             scooter: { name: "City Moped", desc: "Lightweight, low torque, easy to handle baseline.", cost: 0, weight: 0.4, power: 0.35, wheel: 60, frameColor: '#3498db' },
-            chopper: { name: "Cruiser Chopper", desc: "Heavy backend chassis. Slow lift but rock solid.", cost: 15, weight: 0.7, power: 0.55, wheel: 85, frameColor: '#e67e22' },
 Use code with caution.
+chopper: { name: "Cruiser Chopper", desc: "Heavy backend chassis. Slow lift but rock solid.", cost: 15, weight: 0.7, power: 0.55, wheel: 85, frameColor: '#e67e22' },
 superbike: { name: "Hyper Sport 1000cc", desc: "Massive engine torque. Fast twitch response profiles.", cost: 45, weight: 0.5, power: 0.85, wheel: 70, frameColor: '#e74c3c' }
 };
 const MAPS_DATABASE = {
@@ -312,14 +312,12 @@ city: { name: "Metropolitan Boulevard", desc: "Standard flat asphalt, smooth run
 cyber: { name: "Neo-Neon Tokyo Grid", desc: "High contrast synthwave digital highways.", cost: 20, sky: ['#03001e', '#7303c0'], floor: '#111', line: '#00ffcc' },
 desert: { name: "Sahara Dunes Ridge", desc: "Bumpy cross country rally trail terrain blocks.", cost: 40, sky: ['#ff7e5f', '#feb47b'], floor: '#d2b48c', line: '#a0522d' }
 };
-// Execution Loop Lifecycle Context Structures
 let gameState = 'MENU';
 let score = 0;
 let sessionCoins = 0;
 let distanceMultiplier = 1.0;
 let isPressing = false;
 let currentTab = 'bikes';
-// Dynamic Physics Properties Matrix Context
 let gameSpeed = 15;
 let groundY = V_HEIGHT - 450;
 let roadOffset = 0;
@@ -333,7 +331,6 @@ angularVelocity: 0,
 length: 220,
 maxAngle: Math.PI / 2.15
 };
-// Unified Component Grid Menu Rendering System Logic
 function renderMenuGrids() {
 shopGrid.innerHTML = '';
 if (currentTab === 'bikes') {
@@ -359,7 +356,6 @@ shopGrid.appendChild(card);
 }
 updateHUDText();
 }
-// Grid Click Interaction Pipelines Engine
 shopGrid.addEventListener('click', (e) => {
 if (!e.target.classList.contains('action-btn')) return;
 const key = e.target.getAttribute('data-key');
@@ -389,7 +385,6 @@ saveProfile.currentMap = key;
 saveGame();
 renderMenuGrids();
 });
-// Tab Switching Controls Logic UI Layout Layer
 document.getElementById('tabBikes').addEventListener('click', () => {
 currentTab = 'bikes';
 document.getElementById('tabBikes').classList.add('active');
@@ -402,7 +397,6 @@ document.getElementById('tabMaps').classList.add('active');
 document.getElementById('tabBikes').classList.remove('active');
 renderMenuGrids();
 });
-// Master Application Event Routing Layer Engine
 function setPressState(active) {
 if (gameState === 'PLAYING') {
 isPressing = active;
@@ -448,7 +442,6 @@ renderMenuGrids();
 }
 function processSimulationPhysics() {
 const activeBike = BIKES_DATABASE[saveProfile.currentBike];
-// Dynamic Physics Scaling Constants Layout
 const massFactor = activeBike.weight * 0.22;
 const engineTorque = activeBike.power * 0.32;
 gameSpeed = 16 + (score / 120);
@@ -457,9 +450,8 @@ bikeState.angularVelocity += engineTorque * 0.15;
 } else {
 bikeState.angularVelocity -= massFactor * 0.18;
 }
-bikeState.angularVelocity *= 0.95; // Mechanical dampening coefficient matrix block
+bikeState.angularVelocity *= 0.95;
 bikeState.angle += bikeState.angularVelocity;
-// Chassis ground level check boundary
 if (bikeState.angle <= 0) {
 bikeState.angle = 0;
 bikeState.angularVelocity = 0;
@@ -468,19 +460,15 @@ distanceMultiplier = 1.0;
 updateHUDText();
 }
 }
-// Fatal back-flip check bounds
 if (bikeState.angle > bikeState.maxAngle) {
 triggerCrashSequence("Flipped Chassis Backward!");
 return;
 }
-// Dynamic Score Accumulation Index Logic Rules
 if (bikeState.angle > 0.04) {
 score += (gameSpeed * 0.01) * distanceMultiplier;
 updateHUDText();
 }
-// Background entity scroll layout
 roadOffset = (roadOffset - gameSpeed) % 160;
-// Generate Map Elements
 if (Math.random() < 0.02 && collectibles.length < 8) {
 collectibles.push({
 x: V_WIDTH + 100,
@@ -496,7 +484,6 @@ width: 200,
 passed: false
 });
 }
-// Matrix entities lifecycle collision resolution calculations
 const rearWheelX = bikeState.x;
 const rearWheelY = groundY - activeBike.wheel;
 const frontWheelX = rearWheelX + Math.cos(bikeState.angle) * bikeState.length;
@@ -507,7 +494,7 @@ const dRear = Math.hypot(coin.x - rearWheelX, coin.y - rearWheelY);
 const dFront = Math.hypot(coin.x - frontWheelX, coin.y - frontWheelY);
 if ((dRear < coin.radius + activeBike.wheel * 1.5) || (dFront < coin.radius + activeBike.wheel * 1.2)) {
 sessionCoins++;
-coin.x = -9999; // Flush entity instance context bounds
+coin.x = -9999;
 updateHUDText();
 }
 });
@@ -526,42 +513,33 @@ updateHUDText();
 collectibles = collectibles.filter(c => c.x > -100);
 gates = gates.filter(g => g.x > -200);
 }
-// High Fidelity 4K Graphic Pipeline Implementation Core
 function renderGraphicsSlate() {
 const m = MAPS_DATABASE[saveProfile.currentMap];
 const b = BIKES_DATABASE[saveProfile.currentBike];
-// Render Skyline Background Matrix Gradient
 let skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
 skyGrad.addColorStop(0, m.sky[0]);
 skyGrad.addColorStop(1, m.sky[1]);
 ctx.fillStyle = skyGrad;
 ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
-// Ambient background visual anchors depending on chosen terrain index
 ctx.fillStyle = 'rgba(255,255,255,0.03)';
 if(saveProfile.currentMap === 'desert') {
-// Dune Hills Vectors
 ctx.fillStyle = 'rgba(210,180,140,0.15)';
 ctx.beginPath(); ctx.moveTo(0, groundY); ctx.quadraticCurveTo(V_WIDTH0.3, groundY-400, V_WIDTH0.6, groundY); ctx.moveTo(V_WIDTH0.4, groundY); ctx.quadraticCurveTo(V_WIDTH0.8, groundY-500, V_WIDTH, groundY); ctx.fill();
 } else if (saveProfile.currentMap === 'cyber') {
-// Digital Grid Sky Pillars Lines
 ctx.strokeStyle = 'rgba(0, 255, 204, 0.05)'; ctx.lineWidth = 4;
 for(let i=0; i<V_WIDTH; i+=400) { ctx.strokeRect(i + (roadOffset0.2), 200, 150, groundY-200); }
 } else {
-// Skyline structural cityscape geometry
 ctx.fillStyle = 'rgba(255,255,255,0.02)';
 for(let i=0; i<V_WIDTH; i+=300) { ctx.fillRect(i + (roadOffset0.1), 400 + (i%3)*100, 200, groundY); }
 }
-// Render Road Deck Asphalt Layer
 ctx.fillStyle = m.floor;
 ctx.fillRect(0, groundY, V_WIDTH, V_HEIGHT - groundY);
 ctx.fillStyle = 'rgba(0,0,0,0.2)';
-ctx.fillRect(0, groundY, V_WIDTH, 25); // Edge shadow accent
-// Procedural Dash Line Track Engine Loop Matrix Array Build
+ctx.fillRect(0, groundY, V_WIDTH, 25);
 ctx.fillStyle = m.line;
 for (let i = roadOffset; i < V_WIDTH + 320; i += 320) {
 ctx.fillRect(i, groundY + 120, 140, 15);
 }
-// Render Active Level Interface Entities Array
 collectibles.forEach(coin => {
 ctx.fillStyle = '#ffd700'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 6;
 ctx.beginPath(); ctx.arc(coin.x, coin.y, coin.radius, 0, Math.PI*2); ctx.fill(); ctx.stroke();
@@ -579,13 +557,11 @@ ctx.fillStyle = gate.passed ? '#00ffcc' : '#ff0055';
 ctx.font = 'bold 36px sans-serif';
 ctx.fillText(gate.passed ? "COMBO MATCHED!" : "ALIGN BIKE HERE", gate.x - 120, groundY - 350);
 });
-// Master Art Pipeline Vector Chassis System For Bikes Model Array Structure
 ctx.save();
 const rWheelX = bikeState.x;
 const rWheelY = groundY - b.wheel;
 ctx.translate(rWheelX, rWheelY);
 ctx.rotate(-bikeState.angle);
-// Structure Geometry: Frame Pipes
 ctx.strokeStyle = b.frameColor;
 ctx.lineWidth = 16;
 ctx.beginPath();
@@ -595,25 +571,19 @@ ctx.lineTo(b.length * 0.8, -b.wheel * 1.3);
 ctx.lineTo(b.length * 0.3, 0);
 ctx.closePath();
 ctx.stroke();
-// Structural Element Components: Front Fork Columns
 ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 10;
 ctx.beginPath(); ctx.moveTo(b.length * 0.8, -b.wheel * 1.3); ctx.lineTo(b.length, 0); ctx.stroke();
-// Structural Element Components: Wheels Construction Rims Assembly
 ctx.fillStyle = '#111111'; ctx.strokeStyle = '#eeeeee'; ctx.lineWidth = 12;
 ctx.beginPath(); ctx.arc(0, 0, b.wheel, 0, Math.PI2); ctx.fill(); ctx.stroke();
 ctx.beginPath(); ctx.arc(b.length, 0, b.wheel, 0, Math.PI2); ctx.fill(); ctx.stroke();
-// Inner Core Spokes Mechanical Art Details
 ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 4;
 ctx.beginPath(); ctx.moveTo(-b.wheel,0); ctx.lineTo(b.wheel,0); ctx.moveTo(0,-b.wheel); ctx.lineTo(0,b.wheel); ctx.stroke();
 ctx.save(); ctx.translate(b.length, 0); ctx.rotate(roadOffset * 0.05); ctx.beginPath(); ctx.moveTo(-b.wheel,0); ctx.lineTo(b.wheel,0); ctx.moveTo(0,-b.wheel); ctx.lineTo(0,b.wheel); ctx.stroke(); ctx.restore();
-// Hub core pins center axes
 ctx.fillStyle = '#666'; ctx.beginPath(); ctx.arc(0,0,14,0,Math.PI2); ctx.arc(b.length,0,14,0,Math.PI2); ctx.fill();
-// Upper cockpit block components elements (Engine, Tank block, Saddle pad)
-ctx.fillStyle = '#222222'; ctx.fillRect(b.length0.2, -b.wheel * 1.05, b.length * 0.3, b.wheel * 0.5); // Engine block
-ctx.fillStyle = '#111'; ctx.fillRect(b.length0.1, -b.wheel * 1.35, b.length*0.25, 20); // Saddle Seat
+ctx.fillStyle = '#222222'; ctx.fillRect(b.length0.2, -b.wheel * 1.05, b.length * 0.3, b.wheel * 0.5);
+ctx.fillStyle = '#111'; ctx.fillRect(b.length0.1, -b.wheel * 1.35, b.length*0.25, 20);
 ctx.restore();
 }
-// Global Loop Master Orchestration Block Frame Loop
 function executableMasterFrameLoop() {
 if (gameState === 'PLAYING') {
 processSimulationPhysics();
@@ -621,6 +591,5 @@ processSimulationPhysics();
 renderGraphicsSlate();
 requestAnimationFrame(executableMasterFrameLoop);
 }
-// Initialization Run Command Sequence Kickoff
 renderMenuGrids();
 executableMasterFrameLoop();
