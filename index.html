@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wheelie Party 4K Ultra Arcade</title>
+    <title>Wheelie Party Pure Arcade</title>
     <style>
         * {
             box-sizing: border-box;
@@ -16,8 +16,8 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0b0b16;
-            font-family: 'Segoe UI', system-ui, Roboto, sans-serif;
+            background-color: #05050d;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,207 +26,75 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             background: #000;
         }
         canvas {
             width: 100%;
             height: 100%;
-            max-width: 100%;
-            max-height: 100%;
             object-fit: contain;
             display: block;
         }
         .hud-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 4vh;
+            left: 4vw;
             pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 2vh 2vw;
-            box-sizing: border-box;
-        }
-        .hud-top {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
-        .hud-card {
-            background: rgba(15, 15, 30, 0.75);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 10px 20px;
-            color: #fff;
-            font-size: 1.5rem;
-            font-weight: 800;
+            color: #00ffcc;
+            font-size: 2.5rem;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
+            z-index: 5;
         }
-        #scoreCard { color: #00ffcc; border-color: rgba(0, 255, 204, 0.3); }
-        #coinCard { color: #ffd700; border-color: rgba(255, 215, 0, 0.3); }
-        #multCard {
-            position: absolute;
-            top: 9vh;
-            left: 2vw;
-            font-size: 1.1rem;
-            color: #ff5722;
-            border-color: rgba(255, 87, 34, 0.3);
-            transition: transform 0.1s ease;
-        }
-        .pop { transform: scale(1.2); }
-        
         .menu-panel {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(6, 6, 14, 0.9);
-            backdrop-filter: blur(15px);
+            background: rgba(5, 5, 15, 0.85);
+            backdrop-filter: blur(20px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: white;
-            z-index: 100;
-            padding: 40px;
-            overflow-y: auto;
+            z-index: 10;
+            padding: 20px;
+            text-align: center;
         }
         h1 {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 5px;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
             color: #fff;
-            text-shadow: 0 0 20px rgba(0,255,204,0.6);
-            text-align: center;
+            text-shadow: 0 0 30px rgba(0, 255, 204, 0.8);
         }
         .subtitle {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: #8a8ab0;
-            margin-bottom: 30px;
-            text-align: center;
+            margin-bottom: 40px;
+            max-width: 500px;
+            line-height: 1.6;
         }
-        .tabs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .tab-btn {
-            padding: 10px 25px;
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.1);
-            color: #aaa;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            background: #00ffcc;
-            color: #000;
-            border-color: #00ffcc;
-            box-shadow: 0 0 15px rgba(0,255,204,0.4);
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 900px;
-            margin-bottom: 35px;
-        }
-        .shop-card {
-            background: rgba(255,255,255,0.03);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        .shop-card.selected {
-            border-color: #00ffcc;
-            background: rgba(0, 255, 204, 0.05);
-        }
-        .shop-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 8px;
-        }
-        .shop-card p {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-bottom: 15px;
-            height: 40px;
-        }
-        .stats-box {
-            width: 100%;
-            font-size: 0.8rem;
-            color: #777;
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        .stat-bar {
-            height: 6px;
-            background: #222;
-            border-radius: 3px;
-            margin-top: 3px;
-            margin-bottom: 8px;
-            overflow: hidden;
-        }
-        .stat-fill {
-            height: 100%;
-            background: #ff5722;
-        }
-        .action-btn {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-buy { background: #ffd700; color: #000; }
-        .btn-select { background: rgba(255,255,255,0.1); color: #fff; }
-        .btn-selected { background: #00ffcc; color: #000; pointer-events: none; }
-        
-        .main-start-btn {
-            padding: 15px 50px;
-            font-size: 1.8rem;
+        .start-btn {
+            padding: 20px 60px;
+            font-size: 2rem;
             font-weight: 900;
             color: #000;
             background: #00ffcc;
             border: none;
-            border-radius: 40px;
+            border-radius: 50px;
             cursor: pointer;
             text-transform: uppercase;
-            box-shadow: 0 10px 30px rgba(0,255,204,0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
             transition: transform 0.1s, background 0.2s;
         }
-        .main-start-btn:active { transform: scale(0.95); }
-        
-        #instructionsHint {
-            bottom: 2vh;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 1rem;
-            color: rgba(255,255,255,0.4);
-            letter-spacing: 1px;
+        .start-btn:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
@@ -236,26 +104,13 @@
         <canvas id="gameCanvas"></canvas>
         
         <div class="hud-overlay">
-            <div class="hud-top">
-                <div id="scoreCard" class="hud-card">Dist: <span id="scoreVal">0</span>m</div>
-                <div id="coinCard" class="hud-card">🪙 <span id="coinVal">0</span></div>
-            </div>
-            <div id="multCard" class="hud-card">Mult: X<span id="multVal">1.0</span></div>
-            <div id="instructionsHint">HOLD SPACE / TOUCH TO POP A WHEELIE</div>
+            Score: <span id="scoreVal">0</span>
         </div>
 
         <div id="menuPanel" class="menu-panel">
-            <h1 id="menuTitle">Wheelie Party 4K</h1>
-            <p id="menuSubtitle" class="subtitle">Select your ride and map, buy upgrades, and ride out.</p>
-            
-            <div class="tabs">
-                <button id="tabBikes" class="tab-btn active">Bikes</button>
-                <button id="tabMaps" class="tab-btn">Maps</button>
-            </div>
-
-            <div id="shopGrid" class="grid-container"></div>
-
-            <button id="masterStartBtn" class="main-start-btn">Start Session</button>
+            <h1 id="menuTitle">Wheelie Party</h1>
+            <p id="menuSubtitle" class="subtitle">Hold SPACEBAR, UP ARROW, or CLICK & HOLD to pull back. Score points continuously by keeping your front wheel off the ground!</p>
+            <button id="startBtn" class="start-btn">Ride</button>
         </div>
     </div>
 
@@ -263,333 +118,220 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const menuPanel = document.getElementById('menuPanel');
-        const shopGrid = document.getElementById('shopGrid');
-        const masterStartBtn = document.getElementById('masterStartBtn');
+        const startBtn = document.getElementById('startBtn');
         const menuTitle = document.getElementById('menuTitle');
         const menuSubtitle = document.getElementById('menuSubtitle');
+        const scoreVal = document.getElementById('scoreVal');
 
+        // High fidelity internal matrix configurations
         const V_WIDTH = 3840;  
         const V_HEIGHT = 2160; 
         canvas.width = V_WIDTH;
         canvas.height = V_HEIGHT;
 
-        // Default layout parameters
-        let saveProfile = {
-            totalCoins: 0,
-            unlockedBikes: ['scooter'],
-            unlockedMaps: ['city'],
-            currentBike: 'scooter',
-            currentMap: 'city'
+        // Core physics configurations
+        let gameState = 'MENU'; 
+        let score = 0;
+        let isPressing = false;
+        let gameSpeed = 22;
+        const groundY = V_HEIGHT - 500;
+        let roadOffset = 0;
+
+        // Motorcycle structural parameters
+        const bike = {
+            x: 900,
+            angle: 0,
+            angularVelocity: 0,
+            length: 240,
+            wheelRadius: 75,
+            maxAngle: Math.PI / 2.1,
+            torque: 0.015,
+            gravity: 0.012
         };
 
-        // Resilient data-merging fix to clean broken browser memory arrays
-        if(localStorage.getItem('WPA_4K_SAVE')) {
-            try { 
-                const loaded = JSON.parse(localStorage.getItem('WPA_4K_SAVE')); 
-                if (loaded && typeof loaded === 'object') {
-                    // Safe structural merge properties baseline validation
-                    saveProfile = Object.assign({}, saveProfile, loaded);
-                    if (!Array.isArray(saveProfile.unlockedBikes)) saveProfile.unlockedBikes = ['scooter'];
-                    if (!Array.isArray(saveProfile.unlockedMaps)) saveProfile.unlockedMaps = ['city'];
-                }
-            } catch(e){
-                console.error("Save state repaired reset initialization.");
+        // Event structural mapping mechanics
+        function setControlState(active) {
+            if (gameState === 'PLAYING') {
+                isPressing = active;
+            } else if (gameState === 'GAMEOVER') {
+                launchSession();
             }
         }
 
-        function saveGame() {
-            localStorage.setItem('WPA_4K_SAVE', JSON.stringify(saveProfile));
+        window.addEventListener('keydown', (e) => { 
+            if (e.code === 'Space' || e.code === 'ArrowUp') { 
+                e.preventDefault(); 
+                setControlState(true); 
+            } 
+        });
+        window.addEventListener('keyup', (e) => { 
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                setControlState(false); 
+            }
+        });
+        
+        canvas.addEventListener('mousedown', (e) => { e.preventDefault(); setControlState(true); });
+        canvas.addEventListener('mouseup', () => setControlState(false));
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); setControlState(true); });
+        canvas.addEventListener('touchend', () => setControlState(false));
+        startBtn.addEventListener('click', launchSession);
+
+        function launchSession() {
+            score = 0;
+            bike.angle = 0;
+            bike.angularVelocity = 0;
+            isPressing = false;
+            gameState = 'PLAYING';
+            menuPanel.style.display = 'none';
+            scoreVal.textContent = "0";
         }
 
-        const BIKES_DATABASE = {
-            scooter: { name: "City Moped", desc: "Lightweight, low torque, easy to handle baseline.", cost: 0, weight: 0.4, power: 0.35, wheel: 60, frameColor: '#3498db' },
+        function triggerCrash() {
+            gameState = 'GAMEOVER';
+            menuTitle.textContent = "Flipped Over!";
+            menuSubtitle.innerHTML = `You leaned back too far.<br><br>Final Score: <b>${Math.floor(score)}</b>`;
+            startBtn.textContent = "Try Again";
+            menuPanel.style.display = 'flex';
+        }
+
+        function updatePhysics() {
+            // Apply rotational velocity calculations
+            if (isPressing) {
+                bike.angularVelocity += bike.torque;
+            } else {
+                bike.angularVelocity -= bike.gravity;
+            }
+
+            // Apply friction dampening forces
+            bike.angularVelocity *= 0.96;
+            bike.angle += bike.angularVelocity;
+
+            // Enforce bottom boundary frame constraints
+            if (bike.angle <= 0) {
+                bike.angle = 0;
+                bike.angularVelocity = 0;
+            }
+
+            // Enforce critical tipping crash bounds
+            if (bike.angle > bike.maxAngle) {
+                triggerCrash();
+                return;
+            }
+
+            // Score continuous points only while front wheel is successfully in the air
+            if (bike.angle > 0.02) {
+                score += 1;
+                scoreVal.textContent = Math.floor(score);
+            }
+
+            // Animate background ground landscape tracks
+            roadOffset = (roadOffset - gameSpeed) % 200;
+        }
+
+        function renderGraphics() {
+            // Clear current viewing window
+            ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
+
+            // Draw Sky Gradient
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+            skyGrad.addColorStop(0, '#0a0a1a');
+            skyGrad.addColorStop(1, '#151535');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+
+            // Draw Synthwave Grid Horizon Lines
+            ctx.strokeStyle = 'rgba(0, 255, 204, 0.08)';
+            ctx.lineWidth = 4;
+            for (let i = 0; i < V_WIDTH; i += 300) {
+                ctx.beginPath();
+                ctx.moveTo(i + (roadOffset * 0.2), 600);
+                ctx.lineTo(i + (roadOffset * 0.2), groundY);
+                ctx.stroke();
+            }
+
+            // Draw Core Asphalt Runway Road
+            ctx.fillStyle = '#111116';
+            ctx.fillRect(0, groundY, V_WIDTH, V_HEIGHT - groundY);
+
+            // Draw Neon Runway Boundary Edge
+            ctx.fillStyle = '#00ffcc';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00ffcc';
+            ctx.fillRect(0, groundY, V_WIDTH, 12);
+            ctx.shadowBlur = 0; // Reset canvas filter state instantly
+
+            // Draw Track Guide Dash Markers
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            for (let i = roadOffset; i < V_WIDTH + 200; i += 200) {
+                ctx.fillRect(i, groundY + 150, 100, 12);
+            }
+
+            // Draw Motorcycle Vector Geometry
+            ctx.save();
+            const rearAxleX = bike.x;
+            const rearAxleY = groundY - bike.wheelRadius;
+            ctx.translate(rearAxleX, rearAxleY);
+            ctx.rotate(-bike.angle);
+
+            // Chassis Main Tube Frame Pipes
+            ctx.strokeStyle = '#ff0055';
+            ctx.lineWidth = 16;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(bike.length * 0.4, -bike.wheelRadius * 1.3);
+            ctx.lineTo(bike.length * 0.8, -bike.wheelRadius * 1.4);
+            ctx.lineTo(bike.length * 0.35, 0);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Front Axle Support Forks Columns
+            ctx.strokeStyle = '#00ffcc';
+            ctx.lineWidth = 12;
+            ctx.beginPath();
+            ctx.moveTo(bike.length * 0.8, -bike.wheelRadius * 1.4);
+            ctx.lineTo(bike.length, 0);
+            ctx.stroke();
+
+            // Rear Tire Outer Assembly Rim
+            ctx.fillStyle = '#111';
 Use code with caution.
-chopper: { name: "Cruiser Chopper", desc: "Heavy backend chassis. Slow lift but rock solid.", cost: 15, weight: 0.7, power: 0.55, wheel: 85, frameColor: '#e67e22' },
-superbike: { name: "Hyper Sport 1000cc", desc: "Massive engine torque. Fast twitch response profiles.", cost: 45, weight: 0.5, power: 0.85, wheel: 70, frameColor: '#e74c3c' }
-};
-const MAPS_DATABASE = {
-city: { name: "Metropolitan Boulevard", desc: "Standard flat asphalt, smooth runs.", cost: 0, sky: ['#0f172a', '#1e293b'], floor: '#475569', line: '#f1f5f9' },
-cyber: { name: "Neo-Neon Tokyo Grid", desc: "High contrast synthwave digital highways.", cost: 20, sky: ['#03001e', '#7303c0'], floor: '#111', line: '#00ffcc' },
-desert: { name: "Sahara Dunes Ridge", desc: "Bumpy cross country rally trail terrain blocks.", cost: 40, sky: ['#ff7e5f', '#feb47b'], floor: '#d2b48c', line: '#a0522d' }
-};
-let gameState = 'MENU';
-let score = 0;
-let sessionCoins = 0;
-let distanceMultiplier = 1.0;
-let isPressing = false;
-let currentTab = 'bikes';
-let gameSpeed = 15;
-let groundY = V_HEIGHT - 450;
-let roadOffset = 0;
-let collectibles = [];
-let gates = [];
-let bikeState = {
-x: 800,
-y: groundY,
-angle: 0,
-angularVelocity: 0,
-length: 220,
-maxAngle: Math.PI / 2.15
-};
-function renderMenuGrids() {
-shopGrid.innerHTML = '';
-if (currentTab === 'bikes') {
-Object.keys(BIKES_DATABASE).forEach(key => {
-const b = BIKES_DATABASE[key];
-const isUnlocked = saveProfile.unlockedBikes.includes(key);
-const isSelected = saveProfile.currentBike === key;
-const card = document.createElement('div');
-card.className = shop-card ${isSelected ? 'selected' : ''};
-card.innerHTML = <h3>${b.name}</h3> <p>${b.desc}</p> <div class="stats-box"> Weight: <div class="stat-bar"><div class="stat-fill" style="width:${b.weight*100}%; background:#3498db"></div></div> Torque Power: <div class="stat-bar"><div class="stat-fill" style="width:${b.power*100}%; background:#e74c3c"></div></div> </div> <button class="action-btn ${isSelected ? 'btn-selected' : (isUnlocked ? 'btn-select' : 'btn-buy')}" data-key="${key}"> ${isSelected ? 'Selected' : (isUnlocked ? 'Equip' :🪙 ${b.cost} Coins)} </button> ;
-shopGrid.appendChild(card);
-});
-} else {
-Object.keys(MAPS_DATABASE).forEach(key => {
-const m = MAPS_DATABASE[key];
-const isUnlocked = saveProfile.unlockedMaps.includes(key);
-const isSelected = saveProfile.currentMap === key;
-const card = document.createElement('div');
-card.className = shop-card ${isSelected ? 'selected' : ''};
-card.innerHTML = <h3>${m.name}</h3> <p>${m.desc}</p> <div style="width:100%; height:30px; background:linear-gradient(90deg, ${m.sky[0]}, ${m.sky[1]}); margin-bottom:15px; border-radius:4px;"></div> <button class="action-btn ${isSelected ? 'btn-selected' : (isUnlocked ? 'btn-select' : 'btn-buy')}" data-key="${key}"> ${isSelected ? 'Selected' : (isUnlocked ? 'Travel' :🪙 ${m.cost} Coins)} </button> ;
-shopGrid.appendChild(card);
-});
-}
-updateHUDText();
-}
-shopGrid.addEventListener('click', (e) => {
-if (!e.target.classList.contains('action-btn')) return;
-const key = e.target.getAttribute('data-key');
-if (currentTab === 'bikes') {
-if (saveProfile.unlockedBikes.includes(key)) {
-saveProfile.currentBike = key;
-} else {
-const cost = BIKES_DATABASE[key].cost;
-if (saveProfile.totalCoins >= cost) {
-saveProfile.totalCoins -= cost;
-saveProfile.unlockedBikes.push(key);
-saveProfile.currentBike = key;
-} else { alert("Not enough coins collected!"); return; }
-}
-} else {
-if (saveProfile.unlockedMaps.includes(key)) {
-saveProfile.currentMap = key;
-} else {
-const cost = MAPS_DATABASE[key].cost;
-if (saveProfile.totalCoins >= cost) {
-saveProfile.totalCoins -= cost;
-saveProfile.unlockedMaps.push(key);
-saveProfile.currentMap = key;
-} else { alert("Not enough coins collected!"); return; }
-}
-}
-saveGame();
-renderMenuGrids();
-});
-document.getElementById('tabBikes').addEventListener('click', () => {
-currentTab = 'bikes';
-document.getElementById('tabBikes').classList.add('active');
-document.getElementById('tabMaps').classList.remove('active');
-renderMenuGrids();
-});
-document.getElementById('tabMaps').addEventListener('click', () => {
-currentTab = 'maps';
-document.getElementById('tabMaps').classList.add('active');
-document.getElementById('tabBikes').classList.remove('active');
-renderMenuGrids();
-});
-function setPressState(active) {
-if (gameState === 'PLAYING') {
-isPressing = active;
-} else if (gameState === 'GAMEOVER') {
-initiateGameLaunch();
-}
-}
-window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); setPressState(true); } });
-window.addEventListener('keyup', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') setPressState(false); });
-canvas.addEventListener('mousedown', (e) => { e.preventDefault(); setPressState(true); });
-canvas.addEventListener('mouseup', () => setPressState(false));
-canvas.addEventListener('touchstart', (e) => { e.preventDefault(); setPressState(true); });
-canvas.addEventListener('touchend', () => setPressState(false));
-masterStartBtn.addEventListener('click', initiateGameLaunch);
-function updateHUDText() {
-document.getElementById('scoreVal').textContent = Math.floor(score);
-document.getElementById('coinVal').textContent = saveProfile.totalCoins + sessionCoins;
-document.getElementById('multVal').textContent = distanceMultiplier.toFixed(1);
-}
-function initiateGameLaunch() {
-score = 0;
-sessionCoins = 0;
-distanceMultiplier = 1.0;
-gameSpeed = 16;
-bikeState.angle = 0;
-bikeState.angularVelocity = 0;
-collectibles = [];
-gates = [];
-isPressing = false;
-gameState = 'PLAYING';
-menuPanel.style.display = 'none';
-updateHUDText();
-}
-function triggerCrashSequence(reason) {
-gameState = 'GAMEOVER';
-saveProfile.totalCoins += sessionCoins;
-saveGame();
-menuTitle.textContent = "Crash Detected!";
-menuSubtitle.innerHTML = ${reason}<br><br>Distance Traveled: <b>${Math.floor(score)}m</b><br>Session Profit: 🪙 <b>${sessionCoins}</b>;
-masterStartBtn.textContent = "Re-Ride Circuit";
-menuPanel.style.display = 'flex';
-renderMenuGrids();
-}
-function processSimulationPhysics() {
-const activeBike = BIKES_DATABASE[saveProfile.currentBike];
-const massFactor = activeBike.weight * 0.22;
-const engineTorque = activeBike.power * 0.32;
-gameSpeed = 16 + (score / 120);
-if (isPressing) {
-bikeState.angularVelocity += engineTorque * 0.15;
-} else {
-bikeState.angularVelocity -= massFactor * 0.18;
-}
-bikeState.angularVelocity *= 0.95;
-bikeState.angle += bikeState.angularVelocity;
-if (bikeState.angle <= 0) {
-bikeState.angle = 0;
-bikeState.angularVelocity = 0;
-if(distanceMultiplier > 1.0) {
-distanceMultiplier = 1.0;
-updateHUDText();
-}
-}
-if (bikeState.angle > bikeState.maxAngle) {
-triggerCrashSequence("Flipped Chassis Backward!");
-return;
-}
-if (bikeState.angle > 0.04) {
-score += (gameSpeed * 0.01) * distanceMultiplier;
-updateHUDText();
-}
-roadOffset = (roadOffset - gameSpeed) % 160;
-if (Math.random() < 0.02 && collectibles.length < 8) {
-collectibles.push({
-x: V_WIDTH + 100,
-y: Math.random() > 0.4 ? groundY - Math.sin(0.4) * bikeState.length - 80 : groundY - 100,
-radius: 35
-});
-}
-if (Math.random() < 0.004 && gates.length === 0) {
-gates.push({
-x: V_WIDTH + 200,
-targetAngle: 0.25 + Math.random() * 0.45,
-width: 200,
-passed: false
-});
-}
-const rearWheelX = bikeState.x;
-const rearWheelY = groundY - activeBike.wheel;
-const frontWheelX = rearWheelX + Math.cos(bikeState.angle) * bikeState.length;
-const frontWheelY = rearWheelY - Math.sin(bikeState.angle) * bikeState.length;
-collectibles.forEach(coin => {
-coin.x -= gameSpeed;
-const dRear = Math.hypot(coin.x - rearWheelX, coin.y - rearWheelY);
-const dFront = Math.hypot(coin.x - frontWheelX, coin.y - frontWheelY);
-if ((dRear < coin.radius + activeBike.wheel * 1.5) || (dFront < coin.radius + activeBike.wheel * 1.2)) {
-sessionCoins++;
-coin.x = -9999;
-updateHUDText();
-}
-});
-gates.forEach(gate => {
-gate.x -= gameSpeed;
-if (!gate.passed && gate.x < bikeState.x + 100 && gate.x > bikeState.x - 100) {
-if (Math.abs(bikeState.angle - gate.targetAngle) < 0.18) {
-gate.passed = true;
-distanceMultiplier += 0.5;
-document.getElementById('multCard').classList.add('pop');
-setTimeout(() => document.getElementById('multCard').classList.remove('pop'), 150);
-updateHUDText();
-}
-}
-});
-collectibles = collectibles.filter(c => c.x > -100);
-gates = gates.filter(g => g.x > -200);
-}
-function renderGraphicsSlate() {
-const m = MAPS_DATABASE[saveProfile.currentMap];
-const b = BIKES_DATABASE[saveProfile.currentBike];
-let skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
-skyGrad.addColorStop(0, m.sky[0]);
-skyGrad.addColorStop(1, m.sky[1]);
-ctx.fillStyle = skyGrad;
-ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
-ctx.fillStyle = 'rgba(255,255,255,0.03)';
-if(saveProfile.currentMap === 'desert') {
-ctx.fillStyle = 'rgba(210,180,140,0.15)';
-ctx.beginPath(); ctx.moveTo(0, groundY); ctx.quadraticCurveTo(V_WIDTH0.3, groundY-400, V_WIDTH0.6, groundY); ctx.moveTo(V_WIDTH0.4, groundY); ctx.quadraticCurveTo(V_WIDTH0.8, groundY-500, V_WIDTH, groundY); ctx.fill();
-} else if (saveProfile.currentMap === 'cyber') {
-ctx.strokeStyle = 'rgba(0, 255, 204, 0.05)'; ctx.lineWidth = 4;
-for(let i=0; i<V_WIDTH; i+=400) { ctx.strokeRect(i + (roadOffset0.2), 200, 150, groundY-200); }
-} else {
-ctx.fillStyle = 'rgba(255,255,255,0.02)';
-for(let i=0; i<V_WIDTH; i+=300) { ctx.fillRect(i + (roadOffset0.1), 400 + (i%3)*100, 200, groundY); }
-}
-ctx.fillStyle = m.floor;
-ctx.fillRect(0, groundY, V_WIDTH, V_HEIGHT - groundY);
-ctx.fillStyle = 'rgba(0,0,0,0.2)';
-ctx.fillRect(0, groundY, V_WIDTH, 25);
-ctx.fillStyle = m.line;
-for (let i = roadOffset; i < V_WIDTH + 320; i += 320) {
-ctx.fillRect(i, groundY + 120, 140, 15);
-}
-collectibles.forEach(coin => {
-ctx.fillStyle = '#ffd700'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 6;
-ctx.beginPath(); ctx.arc(coin.x, coin.y, coin.radius, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-ctx.fillStyle = '#b8860b'; ctx.font = '900 40px sans-serif'; ctx.fillText("$", coin.x - 12, coin.y + 14);
-});
-gates.forEach(gate => {
-ctx.save();
-ctx.translate(gate.x, groundY - b.wheel);
-ctx.rotate(-gate.targetAngle);
-ctx.strokeStyle = gate.passed ? '#00ffcc' : '#ff0055';
-ctx.lineWidth = 12;
-ctx.strokeRect(-20, -b.wheel*2, gate.width + 40, b.wheel * 4);
-ctx.restore();
-ctx.fillStyle = gate.passed ? '#00ffcc' : '#ff0055';
-ctx.font = 'bold 36px sans-serif';
-ctx.fillText(gate.passed ? "COMBO MATCHED!" : "ALIGN BIKE HERE", gate.x - 120, groundY - 350);
-});
-ctx.save();
-const rWheelX = bikeState.x;
-const rWheelY = groundY - b.wheel;
-ctx.translate(rWheelX, rWheelY);
-ctx.rotate(-bikeState.angle);
-ctx.strokeStyle = b.frameColor;
-ctx.lineWidth = 16;
+ctx.strokeStyle = '#fff';
+ctx.lineWidth = 14;
 ctx.beginPath();
-ctx.moveTo(0, 0);
-ctx.lineTo(b.length * 0.4, -b.wheel * 1.2);
-ctx.lineTo(b.length * 0.8, -b.wheel * 1.3);
-ctx.lineTo(b.length * 0.3, 0);
-ctx.closePath();
+ctx.arc(0, 0, bike.wheelRadius, 0, Math.PI * 2);
+ctx.fill();
 ctx.stroke();
-ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 10;
-ctx.beginPath(); ctx.moveTo(b.length * 0.8, -b.wheel * 1.3); ctx.lineTo(b.length, 0); ctx.stroke();
-ctx.fillStyle = '#111111'; ctx.strokeStyle = '#eeeeee'; ctx.lineWidth = 12;
-ctx.beginPath(); ctx.arc(0, 0, b.wheel, 0, Math.PI2); ctx.fill(); ctx.stroke();
-ctx.beginPath(); ctx.arc(b.length, 0, b.wheel, 0, Math.PI2); ctx.fill(); ctx.stroke();
-ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 4;
-ctx.beginPath(); ctx.moveTo(-b.wheel,0); ctx.lineTo(b.wheel,0); ctx.moveTo(0,-b.wheel); ctx.lineTo(0,b.wheel); ctx.stroke();
-ctx.save(); ctx.translate(b.length, 0); ctx.rotate(roadOffset * 0.05); ctx.beginPath(); ctx.moveTo(-b.wheel,0); ctx.lineTo(b.wheel,0); ctx.moveTo(0,-b.wheel); ctx.lineTo(0,b.wheel); ctx.stroke(); ctx.restore();
-ctx.fillStyle = '#666'; ctx.beginPath(); ctx.arc(0,0,14,0,Math.PI2); ctx.arc(b.length,0,14,0,Math.PI2); ctx.fill();
-ctx.fillStyle = '#222222'; ctx.fillRect(b.length0.2, -b.wheel * 1.05, b.length * 0.3, b.wheel * 0.5);
-ctx.fillStyle = '#111'; ctx.fillRect(b.length0.1, -b.wheel * 1.35, b.length*0.25, 20);
+// Front Tire Outer Assembly Rim
+ctx.beginPath();
+ctx.arc(bike.length, 0, bike.wheelRadius, 0, Math.PI * 2);
+ctx.fill();
+ctx.stroke();
+// Inner Axle Hub Spoke Lines
+ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+ctx.lineWidth = 4;
+ctx.beginPath();
+ctx.moveTo(-bike.wheelRadius, 0); ctx.lineTo(bike.wheelRadius, 0);
+ctx.moveTo(0, -bike.wheelRadius); ctx.lineTo(0, bike.wheelRadius);
+ctx.stroke();
+ctx.save();
+ctx.translate(bike.length, 0);
+ctx.rotate(roadOffset * 0.05);
+ctx.beginPath();
+ctx.moveTo(-bike.wheelRadius, 0); ctx.lineTo(bike.wheelRadius, 0);
+ctx.moveTo(0, -bike.wheelRadius); ctx.lineTo(0, bike.wheelRadius);
+ctx.stroke();
+ctx.restore();
+// Seat Cushion Base Pad
+ctx.fillStyle = '#222';
+ctx.fillRect(bike.length * 0.1, -bike.wheelRadius * 1.45, bike.length * 0.25, 25);
 ctx.restore();
 }
-function executableMasterFrameLoop() {
+function gameLoop() {
 if (gameState === 'PLAYING') {
-processSimulationPhysics();
+updatePhysics();
 }
-renderGraphicsSlate();
-requestAnimationFrame(executableMasterFrameLoop);
+renderGraphics();
+requestAnimationFrame(gameLoop);
 }
-renderMenuGrids();
-executableMasterFrameLoop();
+// Start execution sequence loops
+gameLoop();
