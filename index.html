@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wheelie Party Pure Arcade</title>
+    <title>Wheelie Party Pure Canvas Arcade</title>
     <style>
         * {
             box-sizing: border-box;
@@ -34,102 +34,24 @@
             object-fit: contain;
             display: block;
         }
-        .hud-overlay {
-            position: absolute;
-            top: 4vh;
-            left: 4vw;
-            pointer-events: none;
-            color: #00ffcc;
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
-            z-index: 5;
-        }
-        .menu-panel {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5, 5, 15, 0.85);
-            backdrop-filter: blur(20px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            z-index: 10;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 4rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 15px;
-            color: #fff;
-            text-shadow: 0 0 30px rgba(0, 255, 204, 0.8);
-        }
-        .subtitle {
-            font-size: 1.2rem;
-            color: #8a8ab0;
-            margin-bottom: 40px;
-            max-width: 500px;
-            line-height: 1.6;
-        }
-        .start-btn {
-            padding: 20px 60px;
-            font-size: 2rem;
-            font-weight: 900;
-            color: #000;
-            background: #00ffcc;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
-            transition: transform 0.1s, background 0.2s;
-            pointer-events: auto; /* Fixes browser overlay input block */
-        }
-        .start-btn:active {
-            transform: scale(0.95);
-        }
     </style>
 </head>
 <body>
 
     <div id="gameWrapper">
         <canvas id="gameCanvas"></canvas>
-        
-        <div class="hud-overlay">
-            Score: <span id="scoreVal">0</span>
-        </div>
-
-        <div id="menuPanel" class="menu-panel">
-            <h1 id="menuTitle">Wheelie Party</h1>
-            <p id="menuSubtitle" class="subtitle">Hold SPACEBAR, UP ARROW, or CLICK & HOLD to pull back. Score points continuously by keeping your front wheel off the ground!</p>
-            <button id="startBtn" class="start-btn">Ride</button>
-        </div>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const menuPanel = document.getElementById('menuPanel');
-        const startBtn = document.getElementById('startBtn');
-        const menuTitle = document.getElementById('menuTitle');
-        const menuSubtitle = document.getElementById('menuSubtitle');
-        const scoreVal = document.getElementById('scoreVal');
 
         const V_WIDTH = 3840;  
         const V_HEIGHT = 2160; 
         canvas.width = V_WIDTH;
         canvas.height = V_HEIGHT;
 
-        let gameState = 'MENU'; 
+        let gameState = 'MENU'; // MENU, PLAYING, GAMEOVER
         let score = 0;
         let isPressing = false;
         let gameSpeed = 22;
@@ -147,45 +69,39 @@
             gravity: 0.012
         };
 
-        function setControlState(active) {
-            if (gameState === 'PLAYING') {
-                isPressing = active;
+        // Single unified input capture structure
+        function handleGlobalPressStart(e) {
+            if (e) e.preventDefault();
+            
+            if (gameState === 'MENU' || gameState === 'GAMEOVER') {
+                launchSession();
+            } else if (gameState === 'PLAYING') {
+                isPressing = true;
             }
         }
 
+        function handleGlobalPressEnd(e) {
+            if (gameState === 'PLAYING') {
+                isPressing = false;
+            }
+        }
+
+        // Event mappings directly bound to window to bypass overlay traps
         window.addEventListener('keydown', (e) => { 
             if (e.code === 'Space' || e.code === 'ArrowUp') { 
-                e.preventDefault(); 
-                setControlState(true); 
+                handleGlobalPressStart(e);
             } 
         });
         window.addEventListener('keyup', (e) => { 
             if (e.code === 'Space' || e.code === 'ArrowUp') {
-                setControlState(false); 
+                handleGlobalPressEnd(e);
             }
         });
         
-        canvas.addEventListener('mousedown', (e) => { 
-            if (gameState === 'PLAYING') {
-                e.preventDefault(); 
-                setControlState(true); 
-            }
-        });
-        canvas.addEventListener('mouseup', () => setControlState(false));
-        
-        canvas.addEventListener('touchstart', (e) => { 
-            if (gameState === 'PLAYING') {
-                e.preventDefault(); 
-                setControlState(true); 
-            }
-        });
-        canvas.addEventListener('touchend', () => setControlState(false));
-
-        // Click orchestrator explicitly bound to menu actions
-        startBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            launchSession();
-        });
+        canvas.addEventListener('mousedown', handleGlobalPressStart);
+        window.addEventListener('mouseup', handleGlobalPressEnd);
+        canvas.addEventListener('touchstart', handleGlobalPressStart, { passive: false });
+        window.addEventListener('touchend', handleGlobalPressEnd);
 
         function launchSession() {
             score = 0;
@@ -193,16 +109,10 @@
             bike.angularVelocity = 0;
             isPressing = false;
             gameState = 'PLAYING';
-            menuPanel.style.display = 'none';
-            scoreVal.textContent = "0";
         }
 
         function triggerCrash() {
             gameState = 'GAMEOVER';
-            menuTitle.textContent = "Flipped Over!";
-            menuSubtitle.innerHTML = `You leaned back too far.<br><br>Final Score: <b>${Math.floor(score)}</b>`;
-            startBtn.textContent = "Try Again";
-            menuPanel.style.display = 'flex';
         }
 
         function updatePhysics() {
@@ -227,7 +137,6 @@
 
             if (bike.angle > 0.02) {
                 score += 1;
-                scoreVal.textContent = Math.floor(score);
             }
 
             roadOffset = (roadOffset - gameSpeed) % 200;
@@ -236,12 +145,14 @@
         function renderGraphics() {
             ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
 
+            // Draw Sky
             let skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
             skyGrad.addColorStop(0, '#0a0a1a');
             skyGrad.addColorStop(1, '#151535');
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
+            // Draw Synthwave Grid Horizon Lines
             ctx.strokeStyle = 'rgba(0, 255, 204, 0.08)';
             ctx.lineWidth = 4;
             for (let i = 0; i < V_WIDTH; i += 300) {
@@ -251,20 +162,24 @@
                 ctx.stroke();
             }
 
+            // Draw Road
             ctx.fillStyle = '#111116';
             ctx.fillRect(0, groundY, V_WIDTH, V_HEIGHT - groundY);
 
+            // Neon Road Boundary Edge
             ctx.fillStyle = '#00ffcc';
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#00ffcc';
             ctx.fillRect(0, groundY, V_WIDTH, 12);
             ctx.shadowBlur = 0; 
 
+            // Road Lines
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
             for (let i = roadOffset; i < V_WIDTH + 200; i += 200) {
                 ctx.fillRect(i, groundY + 150, 100, 12);
             }
 
+            // Draw Motorcycle
             ctx.save();
             const rearAxleX = bike.x;
             const rearAxleY = groundY - bike.wheelRadius;
@@ -309,23 +224,73 @@
             ctx.stroke();
 
             ctx.save();
-Use code with caution.
-ctx.translate(bike.length, 0);
-ctx.rotate(roadOffset * 0.05);
-ctx.beginPath();
-ctx.moveTo(-bike.wheelRadius, 0); ctx.lineTo(bike.wheelRadius, 0);
-ctx.moveTo(0, -bike.wheelRadius); ctx.lineTo(0, bike.wheelRadius);
-ctx.stroke();
-ctx.restore();
-ctx.fillStyle = '#222';
-ctx.fillRect(bike.length * 0.1, -bike.wheelRadius * 1.45, bike.length * 0.25, 25);
-ctx.restore();
-}
-function gameLoop() {
-if (gameState === 'PLAYING') {
-updatePhysics();
-}
-renderGraphics();
-requestAnimationFrame(gameLoop);
+            ctx.translate(bike.length, 0);
+            ctx.rotate(roadOffset * 0.05);
+            ctx.beginPath();
+            ctx.moveTo(-bike.wheelRadius, 0); ctx.lineTo(bike.wheelRadius, 0);
+            ctx.moveTo(0, -bike.wheelRadius); ctx.lineTo(0, bike.wheelRadius);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.fillStyle = '#222';
+            ctx.fillRect(bike.length * 0.1, -bike.wheelRadius * 1.45, bike.length * 0.25, 25);
+
+            ctx.restore();
+
+            // Render UI Interface Elements Directly onto Canvas
+            if (gameState === 'PLAYING') {
+                ctx.fillStyle = '#00ffcc';
+                ctx.font = '900 110px system-ui, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`SCORE: ${Math.floor(score)}`, 150, 200);
+            } else {
+                // Dim scene with full screen fill mask
+                ctx.fillStyle = 'rgba(5, 5, 15, 0.85)';
+                ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+
+                ctx.textAlign = 'center';
+                
+                if (gameState === 'MENU') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '900 180px system-ui, sans-serif';
+                    ctx.fillText("WHEELIE PARTY", V_WIDTH / 2, V_HEIGHT / 2 - 250);
+
+                    ctx.fillStyle = '#8a8ab0';
+                    ctx.font = '500 55px system-ui, sans-serif';
+                    ctx.fillText("Hold SPACEBAR, UP ARROW, or CLICK & HOLD anywhere to pull back.", V_WIDTH / 2, V_HEIGHT / 2 - 80);
+                    ctx.fillText("Score points continuously by keeping your front wheel off the ground!", V_WIDTH / 2, V_HEIGHT / 2 + 10);
+                } else if (gameState === 'GAMEOVER') {
+                    ctx.fillStyle = '#ff0055';
+                    ctx.font = '900 180px system-ui, sans-serif';
+                    ctx.fillText("FLIPPED OVER!", V_WIDTH / 2, V_HEIGHT / 2 - 250);
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '700 80px system-ui, sans-serif';
+                    ctx.fillText(`FINAL SCORE: ${Math.floor(score)}`, V_WIDTH / 2, V_HEIGHT / 2 - 60);
+                }
+
+                // Render Canvas Interactive Pill Button
+                const btnX = V_WIDTH / 2 - 300;
+                const btnY = V_HEIGHT / 2 + 250;
+                const btnW = 600;
+                const btnH = 160;
+
+                ctx.fillStyle = '#00ffcc';
+                ctx.beginPath();
+                ctx.roundRect(btnX, btnY, btnW, btnH, 80);
+                ctx.fill();
+
+                ctx.fillStyle = '#000000';
+                ctx.font = '900 65px system-ui, sans-serif';
+                ctx.fillText(gameState === 'MENU' ? "RIDE" : "TRY AGAIN", V_WIDTH / 2, btnY + 105);
+            }
+        }
+
+        function gameLoop() {
+            if (gameState === 'PLAYING') {
+                updatePhysics();
+            }
+            renderGraphics();
+            requestAnimationFrame(gameLoop);
 }
 gameLoop();
