@@ -92,6 +92,7 @@
             text-transform: uppercase;
             box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
             transition: transform 0.1s, background 0.2s;
+            pointer-events: auto; /* Fixes browser overlay input block */
         }
         .start-btn:active {
             transform: scale(0.95);
@@ -123,13 +124,11 @@
         const menuSubtitle = document.getElementById('menuSubtitle');
         const scoreVal = document.getElementById('scoreVal');
 
-        // High fidelity internal matrix configurations
         const V_WIDTH = 3840;  
         const V_HEIGHT = 2160; 
         canvas.width = V_WIDTH;
         canvas.height = V_HEIGHT;
 
-        // Core physics configurations
         let gameState = 'MENU'; 
         let score = 0;
         let isPressing = false;
@@ -137,7 +136,6 @@
         const groundY = V_HEIGHT - 500;
         let roadOffset = 0;
 
-        // Motorcycle structural parameters
         const bike = {
             x: 900,
             angle: 0,
@@ -149,12 +147,9 @@
             gravity: 0.012
         };
 
-        // Event structural mapping mechanics
         function setControlState(active) {
             if (gameState === 'PLAYING') {
                 isPressing = active;
-            } else if (gameState === 'GAMEOVER') {
-                launchSession();
             }
         }
 
@@ -170,11 +165,27 @@
             }
         });
         
-        canvas.addEventListener('mousedown', (e) => { e.preventDefault(); setControlState(true); });
+        canvas.addEventListener('mousedown', (e) => { 
+            if (gameState === 'PLAYING') {
+                e.preventDefault(); 
+                setControlState(true); 
+            }
+        });
         canvas.addEventListener('mouseup', () => setControlState(false));
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); setControlState(true); });
+        
+        canvas.addEventListener('touchstart', (e) => { 
+            if (gameState === 'PLAYING') {
+                e.preventDefault(); 
+                setControlState(true); 
+            }
+        });
         canvas.addEventListener('touchend', () => setControlState(false));
-        startBtn.addEventListener('click', launchSession);
+
+        // Click orchestrator explicitly bound to menu actions
+        startBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            launchSession();
+        });
 
         function launchSession() {
             score = 0;
@@ -195,51 +206,42 @@
         }
 
         function updatePhysics() {
-            // Apply rotational velocity calculations
             if (isPressing) {
                 bike.angularVelocity += bike.torque;
             } else {
                 bike.angularVelocity -= bike.gravity;
             }
 
-            // Apply friction dampening forces
             bike.angularVelocity *= 0.96;
             bike.angle += bike.angularVelocity;
 
-            // Enforce bottom boundary frame constraints
             if (bike.angle <= 0) {
                 bike.angle = 0;
                 bike.angularVelocity = 0;
             }
 
-            // Enforce critical tipping crash bounds
             if (bike.angle > bike.maxAngle) {
                 triggerCrash();
                 return;
             }
 
-            // Score continuous points only while front wheel is successfully in the air
             if (bike.angle > 0.02) {
                 score += 1;
                 scoreVal.textContent = Math.floor(score);
             }
 
-            // Animate background ground landscape tracks
             roadOffset = (roadOffset - gameSpeed) % 200;
         }
 
         function renderGraphics() {
-            // Clear current viewing window
             ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
 
-            // Draw Sky Gradient
             let skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
             skyGrad.addColorStop(0, '#0a0a1a');
             skyGrad.addColorStop(1, '#151535');
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
-            // Draw Synthwave Grid Horizon Lines
             ctx.strokeStyle = 'rgba(0, 255, 204, 0.08)';
             ctx.lineWidth = 4;
             for (let i = 0; i < V_WIDTH; i += 300) {
@@ -249,31 +251,26 @@
                 ctx.stroke();
             }
 
-            // Draw Core Asphalt Runway Road
             ctx.fillStyle = '#111116';
             ctx.fillRect(0, groundY, V_WIDTH, V_HEIGHT - groundY);
 
-            // Draw Neon Runway Boundary Edge
             ctx.fillStyle = '#00ffcc';
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#00ffcc';
             ctx.fillRect(0, groundY, V_WIDTH, 12);
-            ctx.shadowBlur = 0; // Reset canvas filter state instantly
+            ctx.shadowBlur = 0; 
 
-            // Draw Track Guide Dash Markers
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
             for (let i = roadOffset; i < V_WIDTH + 200; i += 200) {
                 ctx.fillRect(i, groundY + 150, 100, 12);
             }
 
-            // Draw Motorcycle Vector Geometry
             ctx.save();
             const rearAxleX = bike.x;
             const rearAxleY = groundY - bike.wheelRadius;
             ctx.translate(rearAxleX, rearAxleY);
             ctx.rotate(-bike.angle);
 
-            // Chassis Main Tube Frame Pipes
             ctx.strokeStyle = '#ff0055';
             ctx.lineWidth = 16;
             ctx.beginPath();
@@ -284,7 +281,6 @@
             ctx.closePath();
             ctx.stroke();
 
-            // Front Axle Support Forks Columns
             ctx.strokeStyle = '#00ffcc';
             ctx.lineWidth = 12;
             ctx.beginPath();
@@ -292,28 +288,28 @@
             ctx.lineTo(bike.length, 0);
             ctx.stroke();
 
-            // Rear Tire Outer Assembly Rim
             ctx.fillStyle = '#111';
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 14;
+            ctx.beginPath();
+            ctx.arc(0, 0, bike.wheelRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(bike.length, 0, bike.wheelRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(-bike.wheelRadius, 0); ctx.lineTo(bike.wheelRadius, 0);
+            ctx.moveTo(0, -bike.wheelRadius); ctx.lineTo(0, bike.wheelRadius);
+            ctx.stroke();
+
+            ctx.save();
 Use code with caution.
-ctx.strokeStyle = '#fff';
-ctx.lineWidth = 14;
-ctx.beginPath();
-ctx.arc(0, 0, bike.wheelRadius, 0, Math.PI * 2);
-ctx.fill();
-ctx.stroke();
-// Front Tire Outer Assembly Rim
-ctx.beginPath();
-ctx.arc(bike.length, 0, bike.wheelRadius, 0, Math.PI * 2);
-ctx.fill();
-ctx.stroke();
-// Inner Axle Hub Spoke Lines
-ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-ctx.lineWidth = 4;
-ctx.beginPath();
-ctx.moveTo(-bike.wheelRadius, 0); ctx.lineTo(bike.wheelRadius, 0);
-ctx.moveTo(0, -bike.wheelRadius); ctx.lineTo(0, bike.wheelRadius);
-ctx.stroke();
-ctx.save();
 ctx.translate(bike.length, 0);
 ctx.rotate(roadOffset * 0.05);
 ctx.beginPath();
@@ -321,7 +317,6 @@ ctx.moveTo(-bike.wheelRadius, 0); ctx.lineTo(bike.wheelRadius, 0);
 ctx.moveTo(0, -bike.wheelRadius); ctx.lineTo(0, bike.wheelRadius);
 ctx.stroke();
 ctx.restore();
-// Seat Cushion Base Pad
 ctx.fillStyle = '#222';
 ctx.fillRect(bike.length * 0.1, -bike.wheelRadius * 1.45, bike.length * 0.25, 25);
 ctx.restore();
@@ -333,5 +328,4 @@ updatePhysics();
 renderGraphics();
 requestAnimationFrame(gameLoop);
 }
-// Start execution sequence loops
 gameLoop();
